@@ -1,0 +1,99 @@
+        {% extends 'base.html' %}
+       {% load static %}
+        {% block content %}
+
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title"> Available Projects </h3>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="#">Tables</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">Basic tables</li>
+                </ol>
+              </nav>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>Image Name</th>
+                            <th>Tag</th>
+                            <th>Star</th>
+                            <th>Try this on browser</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>gcc <i class="mdi mdi-link"></i></td>
+                            <td>latest</td> 
+                            <td class="text-danger"><i class="mdi mdi-star"></i> 28.76% </td>
+                            <td><a href="{% url 'container' %}"><label class="badge badge-success">Try</label></a></td>
+                          </tr>
+                          <tr>
+                            <td>uftrace <i class="mdi mdi-link"></i></td>
+                            <td>0.9.11</td>
+                            <td class="text-danger"><i class="mdi mdi-star"></i> 21.06%</td>
+                            <td><a href="{% url 'container' %}"><label class="badge badge-success">Try</label></a></td>
+                          </tr>
+                          <tr>
+                            <td>clang <i class="mdi mdi-link"></i></td>
+                            <td>latest</td>
+                            <td class="text-danger"><i class="mdi mdi-star"></i> 21.06%</td>
+                            <td><a href="{% url 'container' %}"><label class="badge badge-success">Try</label></a></td>
+                          </tr>
+                          <tr>
+                            <td>centos <i class="mdi mdi-link"></i></td>
+                            <td>7</td>
+                            <td class="text-danger"><i class="mdi mdi-star"></i> 21.06%</td>
+                            <td><a href="{% url 'container_c' %}"><label class="badge badge-success">Try</label></a></td>
+                          </tr>
+                          <tr>
+                            <td>ubuntu <i class="mdi mdi-link"></i></td>
+                            <td>18.04</td>
+                            <td class="text-danger"><i class="mdi mdi-star"></i> 21.06%</td>
+                            <td><a href="{% url 'container_u' %}"><label class="badge badge-success">Try</label></a></td>
+                          </tr>
+                          <tr>
+                            <td>busybox <i class="mdi mdi-link"></i></td>
+                            <td>latest</td>
+                            <td class="text-danger"><i class="mdi mdi-star"></i> 21.06%</td>
+                            <td><a href="{% url 'container' %}"><label class="badge badge-success">Try</label></a></td>
+                          </tr>
+                          <tr>
+                            <td>mysql <i class="mdi mdi-link"></i></td>
+                            <td>latest</td>
+                            <td class="text-danger"><i class="mdi mdi-star"></i> 21.06%</td>
+                            <td><a href="{% url 'container' %}"><label class="badge badge-success">Try</label></a></td>
+                          </tr>
+                          <tr>
+                            <td>centos <i class="mdi mdi-link"></i></td>
+                            <td>8</td>
+                            <td class="text-danger"><i class="mdi mdi-star"></i> 21.06%</td>
+                            <td><a href="{% url 'container' %}"><label class="badge badge-success">Try</label></a></td>
+                          </tr>
+
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- content-wrapper ends -->
+          <!-- partial:../../partials/_footer.html -->
+          <footer class="footer">
+            <div class="d-sm-flex justify-content-center justify-content-sm-between">
+              <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © bootstrapdash.com 2021</span>
+              <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center"> Free <a href="https://www.bootstrapdash.com/bootstrap-admin-template/" target="_blank">Bootstrap admin template</a> from Bootstrapdash.com</span>
+            </div>
+          </footer>
+          <!-- partial -->
+        </div>
+       {% endblock %}
