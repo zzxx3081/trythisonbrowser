@@ -1,4 +1,6 @@
 {% load static %}
+{% load socialaccount %}
+{% providers_media_js %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -47,8 +49,8 @@
                     <button type="submit" class="btn btn-primary btn-block enter-btn">Login</button>
                   </div>
                   <div class="d-flex">
-                    <button class="btn btn-github me-2 col">Github </button>
-                    <button class="btn btn-google col">Google </button>
+                    <a class="btn btn-github me-2 col" href="{% provider_login_url 'github' %}">Github </button>
+                    <a class="btn btn-google col" href="{% provider_login_url 'google' %}">google</a>
                   </div>
                   <p class="sign-up">Don't have an Account?<a href="{% url 'register' %}"> Sign Up</a></p>
                 </form>

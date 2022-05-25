@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from ttob_app.views import * 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -17,6 +17,8 @@ urlpatterns = [
     path('pro/', upgradepro, name="upgradepro"),
     path('install/dockerfile', dockerfile, name="dockerfile"),
     path('install/script', script, name="script"),
+    path('logout/', logout, name="logout"),
+    path('accounts/', include('allauth.urls')),
 ]
 
 if settings.DEBUG:
