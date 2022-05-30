@@ -14,10 +14,11 @@ urlpatterns = [
     path('container/gcc/latest/', container, name="container"),
     path('container/ubuntu/18.04/', container_u, name="container_u"),
     path('container/centos/7/', container_c, name="container_c"),
-    path('pro/', upgradepro, name="upgradepro"),
     path('install/dockerfile', dockerfile, name="dockerfile"),
     path('install/script', script, name="script"),
+    path('setting/', setting, name="setting"),
     path('logout/', logout, name="logout"),
+    path('delete/<str:username>', delete, name="delete"),
     path('accounts/', include('allauth.urls')),
 ]
 

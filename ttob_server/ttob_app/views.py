@@ -1,5 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 
 def index(request):
@@ -32,9 +33,24 @@ def dockerfile(request):
 def script(request):
     return render(request, 'install_script.html')
 
-def upgradepro(request):
-    return render(request, 'upgradepro.html')
+@login_required(login_url="/login/")
+def setting(request):
+    return render(request, 'setting.html')
 
 def logout(request):
     auth.logout(request)
     return redirect('login')
+
+def delete(request, username):
+    if request.method == 'POST':
+        context = {}
+        try:
+            u = User.objects.get(username=username)
+            u.delete()
+            context['msg'] = 'The user is deleted.'       
+        except User.DoesNotExist: 
+            context['msg'] = 'User does not exist.'
+        except Exception as e: 
+            context['msg'] = e.message
+        finally:
+            return redirect('login')
