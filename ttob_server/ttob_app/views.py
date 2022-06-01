@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import auth, messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.contrib import auth
 from .forms import UserForm
 
 def index(request):
@@ -20,11 +20,13 @@ def login(request):
 def register(request):
     if request.method == 'POST':
         form = UserForm(request.POST)
-        print("===============form is valid===========")
         if request.POST['password1'] == request.POST['password2']:
             user = User.objects.create_user(username=request.POST['username'], password=request.POST['password1'])
             auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')  
             return redirect('/')
+        else: 
+            messages.warning(request, "password doesn't match")
+            return render(request, 'register.html', {'form': form})
     else:
         form = UserForm()
         return render(request, 'register.html', {'form': form})
