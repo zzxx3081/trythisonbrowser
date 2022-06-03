@@ -13,35 +13,47 @@
                 <div class="card">
                   <div class="card-body">
                     <h4 class="card-title">upload your dockerfile</h4>
-                    <form class="forms-sample">
+                    {% if messages %}
+                      {% for message in messages %}
+                      <div class="alert alert-{{ message.tags }} alert-dismissible text-center" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        {{ message }}
+                      </div>
+                      {% endfor %}
+                    {% endif %}
+                    <form class="forms-sample" enctype="multipart/form-data" action="{% url 'dockerfile' %}" method="POST">
+                      {% csrf_token %}
                       <div class="form-group">
-                        <label for="exampleInputName1">Author</label>
-                        <input type="text" class="form-control" id="exampleInputName1" placeholder="Name">
+                        <label for="author">Author</label>
+                        <input type="text" class="form-control" name="author" id="author" placeholder="Author">
                       </div>
                       <div class="form-group">
-                        <label for="exampleInputName1">Project Name</label>
-                        <input type="text" class="form-control" id="exampleInputName2" placeholder="Enter project name">
+                        <label for="projectname">Project Name</label>
+                        <input type="text" class="form-control" name="projectname" id="projectname" placeholder="Project">
                       </div>
                       <div class="form-group">
-                        <label for="exampleInputName1">Tag</label>
-                        <input type="text" class="form-control" id="exampleInputName3" placeholder="Enter project tag name">
+                        <label for="tag">Tag</label>
+                        <input type="text" class="form-control" name="tag" id="tag" placeholder="Tag">
                       </div>
                       <div class="form-group">
-                        <label for="exampleTextarea1">Project description</label>
-                        <textarea class="form-control" id="exampleTextarea1" rows="10"></textarea>
+                        <label for="contact">Contant Point</label>
+                        <input type="text" class="form-control" name="contact" id="contanct" placeholder="Tag">
+                      </div>
+                      <div class="form-group">
+                        <label for="description">Project description</label>
+                        <textarea class="form-control" name="description" id="description" rows="10"></textarea>
                       </div>
                       <div class="form-group">
                         <label>Dockerfile upload</label>
-                        <input type="file" class="file-upload-default">
+                        <input type="file" class="file-upload-default" name="dockerfile">
                         <div class="input-group col-xs-12">
-                          <input type="file" class="form-control file-upload-info" placeholder="Upload Image">
+                          <input type="file" class="form-control file-upload-info" name="dockerfile" id="dockerfile" placeholder="Upload Image">
                           <span class="input-group-append">
                             <button class="file-upload-browse btn btn-primary" type="button">Upload</button>
                           </span>
                         </div>
                       </div>
                       <button type="submit" class="btn btn-primary me-2">Submit</button>
-                      <button class="btn btn-dark">Cancel</button>
                     </form>
                   </div>
                 </div>
