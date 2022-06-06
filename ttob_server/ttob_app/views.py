@@ -68,11 +68,14 @@ def dockerfile(request):
             obj = Dockerfile.objects.create(file=request.FILES['dockerfile'])
             try:
                 image = client.images.build(fileobj=obj.file, tag=registry_tag)
+                # push image to registry
+                for line in client.api.push(repository=registry_tag, stream=True, decode=True):
+                    print(line)
+                    print("INFO: image upload complete.")
             except Exception:
                 messages.warning(request, 'Dockerfile Build Error')
                 return render(request, 'install_dockerfile.html')
         except IntegrityError:
-            ## check if same oss is installed
             messages.warning(request, 'Same Opensource has been already registered')
         return render(request, 'install_dockerfile.html')
     else:
