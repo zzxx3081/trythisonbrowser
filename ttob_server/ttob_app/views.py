@@ -3,12 +3,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import auth, messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-from .models import OpenSource, Dockerfile
 from django.contrib.auth.decorators import login_required
+from .models import OpenSource, Dockerfile, InstalltionScript
 from .forms import UserForm
-import docker
-import io
-
+import docker, os, io
+from django.conf import settings
+from pathlib import Path
 
 # registry url
 BASE_URL = 'http://127.0.0.1:5000/'
@@ -81,8 +81,53 @@ def dockerfile(request):
     else:
         return render(request, 'install_dockerfile.html')
 
+@login_required(login_url="/login/")
 def script(request):
-    return render(request, 'install_script.html')
+
+    if request.method == 'POST':
+        author = request.POST['author']
+        projectname = request.POST['projectname']
+        tag = request.POST['tag']
+        contact = request.POST['contact']
+        description = request.POST['description']
+        registry_tag = TAG_PREFIX + projectname + "_" + tag
+        baseos = request.POST['baseos']
+        installationscript = request.POST['installationscript']
+        
+        try:
+            OpenSource.objects.create(author=author, projectname=projectname, tag=tag, contact=contact, description=description)
+            try:
+                InstalltionScript.objects.create(baseos=baseos, installationScript=installationscript)
+                f = open("Dockerfile", 'w')
+                data = "FROM " + baseos + '\n'
+                f.write(data)
+                
+                lines = installationscript.splitlines()
+                for i in lines:
+                    if i != "":
+                        data = "RUN " + i + '\n'
+                        f.write(data)
+                f.close()
+
+                image = client.images.build(path=os.getcwd(), tag=registry_tag)
+                # push image to registry
+                for line in client.api.push(repository=registry_tag, stream=True, decode=True):
+                    print(line)
+                    print("INFO: image upload complete.")
+                return render(request, 'install_script.html')
+            except Exception:
+                messages.warning(request, 'Dockerfile Build Error')
+            finally:
+                file_path = os.getcwd() + '/Dockerfile'
+                print("Dockerfile path : ", file_path)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+        except IntegrityError:
+            messages.warning(request, 'Same Opensource has been already registered')
+        return render(request, 'install_script.html')
+    else:
+        return render(request, 'install_script.html')
+
 
 @login_required(login_url="/login/")
 def setting(request):

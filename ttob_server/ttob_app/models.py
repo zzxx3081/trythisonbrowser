@@ -18,6 +18,11 @@ class OpenSource(models.Model):
 class Dockerfile(models.Model):
 	file = models.FileField(blank=False, null=False)
 
+class InstalltionScript(models.Model):
+    baseos = models.CharField(max_length=255)
+    installationScript = models.TextField()
+
+
 # Type:OpenSource = 1:N
 # class OSSType(models.Model):
 # 	opensource = models.ForeignKey("OpenSource", related_name="osstype", on_delete=models.CASCADE, db_column="opensource")
