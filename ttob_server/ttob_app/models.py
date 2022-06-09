@@ -2,13 +2,13 @@ from django.db import models
 from django.db.models import UniqueConstraint
 
 class OpenSource(models.Model):
+    fullname = models.CharField(max_length=100, primary_key=True)
     author = models.CharField(blank=False, null=False, max_length=255)
-    projectname = models.CharField(max_length=255)
-    tag = models.CharField(max_length=255)
+    projectname = models.CharField(blank=False, null=False, max_length=255)
+    tag = models.CharField(blank=False, null=False, max_length=255)
     contact = models.EmailField(max_length=255, blank=True, null=True)
-    description = models.TextField()
+    description = models.TextField(blank=False, null=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
-	# osstype = models.ForeignKey("OpenSource", related_name="osstype", on_delete=models.CASCADE, db_column="opensource")
 
     class Meta:
         constraints = [

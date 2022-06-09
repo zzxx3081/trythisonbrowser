@@ -22,7 +22,23 @@ def index(request):
     return render(request, 'index.html')
 
 def listimg(request):
-    return render(request, 'list.html')
+    # get all open source images
+    open_sources = OpenSource.objects.all()
+    ## TODO pagination 
+
+
+    return render(request, 'list.html', {'open_sources':open_sources})
+
+
+def container(request, fullname):
+
+    # project name, tag, description
+    # get project name
+    # contact info
+    open_source = get_object_or_404(OpenSource, fullname=fullname)
+
+    return render(request, 'container.html', {'open_source':open_source})
+
 
 def userimg(request):
     return render(request, 'user.html')
@@ -44,14 +60,29 @@ def register(request):
         form = UserForm()
         return render(request, 'register.html', {'form': form})
 
-def container(request):
-    return render(request, 'container.html')
+def logout(request):
+    auth.logout(request)
+    return redirect('login')
 
-def container_u(request):
-    return render(request, 'container_u.html')
+@login_required(login_url="/login/")
+def delete(request, username):
+    if request.method == 'POST':
+        context = {}
+        try:
+            u = User.objects.get(username=username)
+            u.delete()
+            context['msg'] = 'The user is deleted.'       
+        except User.DoesNotExist: 
+            context['msg'] = 'User does not exist.'
+        except Exception as e: 
+            context['msg'] = e.message
+        finally:
+            return redirect('login')
 
-def container_c(request):
-    return render(request, 'container_c.html')
+@login_required(login_url="/login/")
+def setting(request):
+    return render(request, 'setting.html')
+
 
 @login_required(login_url="/login/")
 def dockerfile(request):
@@ -62,9 +93,10 @@ def dockerfile(request):
         tag = request.POST['tag']
         contact = request.POST['contact']
         description = request.POST['description']
-        registry_tag = TAG_PREFIX + projectname + "_" + tag
+        registry_tag = TAG_PREFIX + projectname + ":" + tag
+        fullname = projectname + ":" + tag
         try:
-            OpenSource.objects.create(author=author, projectname=projectname, tag=tag, contact=contact, description=description)
+            OpenSource.objects.create(fullname=fullname, author=author, projectname=projectname, tag=tag, contact=contact, description=description)
             obj = Dockerfile.objects.create(file=request.FILES['dockerfile'])
             try:
                 image = client.images.build(fileobj=obj.file, tag=registry_tag)
@@ -77,6 +109,8 @@ def dockerfile(request):
                 return render(request, 'install_dockerfile.html')
         except IntegrityError:
             messages.warning(request, 'Same Opensource has been already registered')
+        finally:
+            pass # TODO Remove tmp Dockerfile
         return render(request, 'install_dockerfile.html')
     else:
         return render(request, 'install_dockerfile.html')
@@ -91,11 +125,12 @@ def script(request):
         contact = request.POST['contact']
         description = request.POST['description']
         registry_tag = TAG_PREFIX + projectname + "_" + tag
+        fullname = projectname + ":" + tag
         baseos = request.POST['baseos']
         installationscript = request.POST['installationscript']
         
         try:
-            OpenSource.objects.create(author=author, projectname=projectname, tag=tag, contact=contact, description=description)
+            OpenSource.objects.create(fullname=fullname, author=author, projectname=projectname, tag=tag, contact=contact, description=description)
             try:
                 InstalltionScript.objects.create(baseos=baseos, installationScript=installationscript)
                 f = open("Dockerfile", 'w')
@@ -129,25 +164,3 @@ def script(request):
         return render(request, 'install_script.html')
 
 
-@login_required(login_url="/login/")
-def setting(request):
-    return render(request, 'setting.html')
-
-def logout(request):
-    auth.logout(request)
-    return redirect('login')
-
-@login_required(login_url="/login/")
-def delete(request, username):
-    if request.method == 'POST':
-        context = {}
-        try:
-            u = User.objects.get(username=username)
-            u.delete()
-            context['msg'] = 'The user is deleted.'       
-        except User.DoesNotExist: 
-            context['msg'] = 'User does not exist.'
-        except Exception as e: 
-            context['msg'] = e.message
-        finally:
-            return redirect('login')
