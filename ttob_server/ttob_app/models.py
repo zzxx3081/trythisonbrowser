@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from django.db.models import UniqueConstraint
 
 class OpenSource(models.Model):
@@ -9,6 +10,7 @@ class OpenSource(models.Model):
     contact = models.EmailField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=False, null=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    like_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="like", blank=True)
 
     class Meta:
         constraints = [
@@ -30,3 +32,10 @@ class InstalltionScript(models.Model):
 
 #     def __str__(self):
 #         return '{}'.format(self.contents)	
+
+class Comment(models.Model):
+    comment = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+    opensource = models.ForeignKey(OpenSource, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="posts")
+  
