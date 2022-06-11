@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .models import OpenSource, Dockerfile, InstalltionScript
 from .forms import UserForm
-import docker, os, io
+import docker, sys, os, io, subprocess, time, threading
 from django.conf import settings
 from pathlib import Path
 
@@ -29,15 +29,88 @@ def listimg(request):
 
     return render(request, 'list.html', {'open_sources':open_sources})
 
-
 def container(request, fullname):
+    # sudo ./ttyd.x86_64 -p 0 docker run -it localhost:5000/ubuntu:18.04
+    # stream = os.popen('./ttyd.x86_64 -p 0 docker run -it localhost:5000/ubuntu:18.04')
+    # output = stream.read()
+    
+    cmd = "./ttyd.x86_64 -p 0 docker run -it localhost:5000/ubuntu:18.04"
+    cmd = ["./ttyd.x86_64", "-p", "0", "docker", "run", "-it", "localhost:5000/ubuntu:18.04"]
+    cmd = ["netstat", "-ltnp", "|", "grep", "ttyd"]
+    cmd = "netstat -ltnp | grep ttyd"
+    cmd = "netstat -taunp  | awk '{print $4}' | awk -F ':' '{print $2}'"
 
-    # project name, tag, description
-    # get project name
-    # contact info
+    
+    # process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
+    # print("==========================")
+    # print("output :", process)
+    # print("==========================")
+
+    # with subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=1, universal_newlines=True) as p:
+    #     for line in p.stdout:
+    #         print(line, end='') # process line here
+
+    # if p.returncode != 0:
+    #     raise CalledProcessError(p.returncode, p.args)
+
+
+    # print("==========================")
+    # cmd = "./ttyd.x86_64 -p 0 docker run -it localhost:5000/ubuntu:18.04"
+    # process = subprocess.run(cmd, shell=True, text=True, stdout=subprocess.PIPE, encoding='utf-8')
+    # time.sleep(2)
+    # print(process.stdout)
+    # print("==========================")
+
+    # timeout == docker timeout
+    #  subprocess.run(args, *, stdin=None, input=None, stdout=None, stderr=None, capture_output=False, shell=False, cwd=None, timeout=None, check=False, encoding=None, errors=None, text=None, env=None, universal_newlines=None, **other_popen_kwargs)
+
+    # Ver. 2
+    # cmd = "./ttyd.x86_64 -p 0 docker run -it localhost:5000/ubuntu:18.04"
+    # p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
+
+    # command = Command("echo 'Process started'; sleep 2; echo 'Process finished'")
     open_source = get_object_or_404(OpenSource, fullname=fullname)
+    ttydports = "netstat -taunp | grep ttyd | awk '{print $4}' | awk -F ':' '{print $2}'"
+    startshell = "./ttyd.x86_64 -p 0 docker run -it localhost:5000/" + open_source.projectname + ":"  + open_source.tag    
+    # startshell = "./ttyd.x86_64 -p 0 docker run -it " + open_source.projectname + ":"  + open_source.tag    
 
-    return render(request, 'container.html', {'open_source':open_source})
+    print("==========================")
+    print("the process is running")
+
+    ### critical section ###
+
+    # current opened port
+    proc = subprocess.Popen(ttydports, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
+    output = proc.communicate()[0]
+    old_used_port = list(dict.fromkeys(output.strip().splitlines()))
+    if ('' in old_used_port):
+        old_used_port.remove('')
+    old_used_port = set(old_used_port)
+    print(old_used_port)
+    print("how many ports? : ", len(old_used_port))
+
+    # start ttyd process
+    process = subprocess.Popen(startshell, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
+    print(">>>>>>>>>>>>>process id :",process.pid)
+    # newly added port
+    proc = subprocess.Popen(ttydports, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
+
+    output = proc.communicate()[0]
+    new_used_port = list(dict.fromkeys(output.strip().splitlines()))
+    if ('' in new_used_port):
+        new_used_port.remove('')
+    new_used_port = set(new_used_port)
+
+    port = new_used_port - old_used_port
+    port = list(port)[0]
+    print(port)
+    ### End critical section ###
+
+    print("==========================")
+
+    # out = subprocess.check_output(['./ttyd.x86_64', '-p', '0', 'docker', 'run', '-it', 'localhost:5000/ubuntu:18.04'])
+    # print(out)
+    return render(request, 'container.html', {'open_source':open_source, 'port':port})
 
 
 def userimg(request):
@@ -124,7 +197,7 @@ def script(request):
         tag = request.POST['tag']
         contact = request.POST['contact']
         description = request.POST['description']
-        registry_tag = TAG_PREFIX + projectname + "_" + tag
+        registry_tag = TAG_PREFIX + projectname + ":" + tag
         fullname = projectname + ":" + tag
         baseos = request.POST['baseos']
         installationscript = request.POST['installationscript']
