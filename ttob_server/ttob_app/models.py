@@ -10,7 +10,10 @@ class OpenSource(models.Model):
     contact = models.EmailField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=False, null=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    like_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="like", blank=True)
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="opensource_likes", blank=True)
+
+    def total_likes(self):
+        return self.likes.count()
 
     class Meta:
         constraints = [

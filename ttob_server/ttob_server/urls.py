@@ -17,6 +17,7 @@ urlpatterns = [
     path('setting/', setting, name="setting"),
     path('logout/', logout, name="logout"),
     path('delete/<str:username>', delete, name="delete"),
+    path('like/<str:fullname>', LikeView, name="like"),
     path('accounts/', include('allauth.urls')),
 ]
 

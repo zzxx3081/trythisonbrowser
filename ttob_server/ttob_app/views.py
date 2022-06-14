@@ -4,6 +4,8 @@ from django.contrib import auth, messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
+from django.http import HttpResponseRedirect
 from .models import OpenSource, Dockerfile, InstalltionScript, Comment
 from .forms import UserForm
 import docker, sys, os, io, subprocess, time, threading, psutil
@@ -19,6 +21,14 @@ TAG_PREFIX = 'localhost:5000/'
 client = docker.from_env()
 
 ps_table = []
+
+def LikeView(request, fullname):
+    print("into views")
+    print(fullname)
+    opensource = get_object_or_404(OpenSource, fullname=fullname)
+    print("hello")
+    opensource.likes.add(request.user)
+    return HttpResponseRedirect(reverse('container', args=[fullname]))
 
 def list_duplicates(seq):
   seen = set()
@@ -100,6 +110,7 @@ def container_v1(request, fullname):
 
 def container(request, fullname):
     open_source = get_object_or_404(OpenSource, fullname=fullname)
+    total_likes = open_source.total_likes()
     comments = Comment.objects.filter(opensource = fullname)
     ttydports = "netstat -taunp | grep ttyd | awk '{print $4}' | awk -F ':' '{print $2}'"
     startshell = "./ttyd.x86_64 -p 0 docker run -it localhost:5000/" + open_source.projectname + ":"  + open_source.tag    
@@ -112,7 +123,6 @@ def container(request, fullname):
         comments = Comment.objects.filter(opensource = fullname)
 
     else:
-
         ### critical section ###
 
         # current opened port
@@ -139,16 +149,19 @@ def container(request, fullname):
 
         ### End critical section ###
 
-    return render(request, 'container.html', {'open_source':open_source, 'comments':comments})
+    return render(request, 'container.html', {'open_source':open_source, 'comments':comments, 'total_likes':total_likes})
 
 
 def userimg(request):
     return render(request, 'user.html')
 
 def login(request):
+
+
     return render(request, 'login.html')
 
 def register(request):
+    ## TODO/Exception Handling:duplicate username 
     if request.method == 'POST':
         form = UserForm(request.POST)
         if request.POST['password1'] == request.POST['password2']:

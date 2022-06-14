@@ -12,10 +12,19 @@
               <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                   <div class="card-body">
-                    <h5>Maintained by: {{ open_source.author }}</h5>
-                    <a href="mailto:{{ open_source.contact }}"><i class="mdi mdi-email"></i> contact</a>
-                    <br/><br/>
-                    <p>{{open_source.description}}</p>
+                    <h5>Maintained by: {{ open_source.author }}</h5><br/>
+                    
+                    <form action="{% url 'like' open_source.fullname %}" method="POST">{% csrf_token %}
+                      <a href="mailto:{{ open_source.contact }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="mdi mdi-email text-primary"></i>Contact Maintainer
+                      </a>
+                      <button type="submit" class="btn btn-outline-secondary btn-sm" name="opensource_id", value="{{ open_source.id }}">
+                        <i class="mdi mdi-heart-outline text-danger"></i>{{ total_likes }} Likes
+                      </button>
+                    </form>
+
+                    <br/>
+                    <blockquote class="blockquote blockquote-primary"><p>{{open_source.description}}</p></blockquote>                    
                   </div>
                 </div>
               </div>
