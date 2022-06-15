@@ -6,56 +6,44 @@
         <div class="main-panel">
           <div class="content-wrapper">
             <div class="page-header">
-              <h3 class="page-title">My containers</h3>
+              <h3 class="page-title">Open Sources You Liked</h3>
             </div>
             <div class="row">
               <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                   <div class="card-body">
-                    <a href="{% url 'container' %}"><label class=".btn-outline-primary">Need more? Try PRO</label></a>
+                    
                     <div class="table-responsive">
                       <table class="table table-hover">
                         <thead>
                           <tr>
                             <th>Image Name</th>
                             <th>Tag</th>
-                            <th>Size</th>
-                            <th>Try this on browser</th>
+                            <th>Author</th>
+                            <th>Uploaded At (GMT)</th>
+                            <th>Star</th>
+                            <th>Try</th>
+                            <th>Delete</th>
                           </tr>
                         </thead>
                         <tbody>
+                          {% for open_source in open_sources %}
                           <tr>
-                            <td>gcc <i class="mdi mdi-link"></i></td>
-                            <td>latest</td> 
-                            <td class="text-danger">51MB </td>
-                            <td><a href="{% url 'container' %}"><label class="badge badge-success">Try</label></a></td>
+                            <td>{{open_source.projectname}} <i class="mdi mdi-link"></i></td>
+                            <td>{{open_source.tag}}</td> 
+                            <td>{{open_source.author}}</td>
+                            <td>{{open_source.uploaded_at}}</td> 
+                            <td class="text-danger"><i class="mdi mdi-star"></i> 28.76% </td>
+                            <td><a href="{% url 'container' open_source.fullname %}"><label class="badge badge-success">Try</label></a></td>
+                            <td>
+                              <form action="{% url 'deleteopensource' open_source.fullname %}" method="POST">{% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-md" name="opensource_id", value="{{ open_source.id }}">
+                                  Delete
+                                </button>
+                              </form>
+                            </td>
                           </tr>
-
-                          <tr>
-                            <td>uftrace <i class="mdi mdi-link"></i></td>
-                            <td>0.9.11</td>
-                            <td class="text-danger">121MB </td>
-                            <td><a href="{% url 'container' %}"><label class="badge badge-success">Try</label></a></td>
-                          </tr>
-                          <tr>
-                            <td>clang <i class="mdi mdi-link"></i></td>
-                            <td>latest</td>
-                            <td class="text-danger">42MB </td>
-                            <td><a href="{% url 'container' %}"><label class="badge badge-success">Try</label></a></td>
-                          </tr>
-                          <tr>
-                            <td>ubuntu <i class="mdi mdi-link"></i></td>
-                            <td>18.04</td>
-                            <td class="text-danger">179MB </td>
-                            <td><a href="{% url 'container_u' %}"><label class="badge badge-success">Try</label></a></td>
-                          </tr>
-                          <tr>
-                            <td>centos<i class="mdi mdi-link"></i></td>
-                            <td>7</td>
-                            <td class="text-danger">153MB </td>
-                            <td><a href="{% url 'container_c' %}"><label class="badge badge-success">Try</label></a></td>
-                          </tr>
-
+                          {% endfor %}
                         </tbody>
                       </table>
                     </div>

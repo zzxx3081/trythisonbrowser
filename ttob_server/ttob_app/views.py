@@ -26,8 +26,15 @@ def LikeView(request, fullname):
     print("into views")
     print(fullname)
     opensource = get_object_or_404(OpenSource, fullname=fullname)
-    print("hello")
-    opensource.likes.add(request.user)
+    
+    
+    re = opensource.likes.filter(username=request.user.username)
+    
+    if re.exists():
+        opensource.likes.remove(request.user)
+    else:
+        opensource.likes.add(request.user)
+
     return HttpResponseRedirect(reverse('container', args=[fullname]))
 
 def list_duplicates(seq):
@@ -93,14 +100,15 @@ def container(request, fullname):
             print("new used port as list : ", new_used_port)
             port = list(set(new_used_port) - set(old_used_port))[0]
             print("port" , port)
-            #### get port end ####
+            ##### get port END CRITICAL SECTION #####
 
-            # release previous port - if profile.port == -1: pass, else: release profile.port
             if profile.port == -1:
                 profile.port = port
                 profile.save()
             else:                
+                ##### get port CRITICAL SECTION #####
                 os.system("fuser -k " + str(profile.port) + "/tcp")
+                ##### get port END CRITICAL SECTION #####
                 profile.port = port
                 profile.save()
 
@@ -120,8 +128,16 @@ def container(request, fullname):
     return render(request, 'container.html', {'url':url, 'open_source':open_source, 'comments':comments, 'total_likes':total_likes})
 
 
-def userimg(request):
-    return render(request, 'user.html')
+def user(request):
+    u = User.objects.get(username=request.user.username)
+    open_sources = u.opensource_likes.all()
+    return render(request, 'user.html', {'open_sources':open_sources})
+
+
+def DeleteView(request, fullname):
+    opensource = get_object_or_404(OpenSource, fullname=fullname)
+    opensource.likes.remove(request.user)
+    return HttpResponseRedirect(reverse('user'))
 
 def login(request):
 
