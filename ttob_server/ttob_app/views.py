@@ -6,14 +6,14 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.http import HttpResponseRedirect
-from .models import OpenSource, Dockerfile, InstalltionScript, Comment
+from .models import OpenSource, Dockerfile, InstalltionScript, Comment, Profile
 from .forms import UserForm
 import docker, sys, os, io, subprocess, time, threading, psutil
 from django.conf import settings
 from pathlib import Path
 
 # registry url
-BASE_URL = 'http://127.0.0.1:5000/'
+BASE_URL = 'http://127.0.0.1'
 TAG_PREFIX = 'localhost:5000/'
 
 # initialize docker SDK
@@ -46,110 +46,78 @@ def listimg(request):
     open_sources = OpenSource.objects.all()
     ## TODO pagination 
 
-
     return render(request, 'list.html', {'open_sources':open_sources})
 
-def container_v1(request, fullname):
 
-    open_source = get_object_or_404(OpenSource, fullname=fullname)
-    ttydports = "netstat -taunp | grep ttyd | awk '{print $4}' | awk -F ':' '{print $2}'"
-    startshell = "./ttyd.x86_64 -p 0 docker run -it localhost:5000/" + open_source.projectname + ":"  + open_source.tag    
-    # startshell = "./ttyd.x86_64 -p 0 docker run -it " + open_source.projectname + ":"  + open_source.tag    
-
-    print("==========================")
-    print("the process is running")
-
-    ### critical section ###
-
-    # current opened port
-    proc = subprocess.Popen(ttydports, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
-    output = proc.communicate()[0]
-    old_used_port = list(dict.fromkeys(output.strip().splitlines()))
-    if ('' in old_used_port):
-        old_used_port.remove('')
-    old_used_port = set(old_used_port)
-    print(old_used_port)
-    print("how many ports? : ", len(old_used_port))
-
-    # start ttyd process
-    process = subprocess.Popen(startshell, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
-    print(">>>>>>>>>>>>>process id :",process.pid)
-    # newly added port
-    proc = subprocess.Popen(ttydports, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
-
-    output = proc.communicate()[0]
-    new_used_port = list(dict.fromkeys(output.strip().splitlines()))
-    if ('' in new_used_port):
-        new_used_port.remove('')
-    print(new_used_port)    
-    new_used_port = set(new_used_port)
-
-    port = new_used_port - old_used_port
-    port = list(port)[0]
-    print(port)
-    ### End critical section ###
-
-    # ps_table.append(process.pid)
-    # for pid in ps_table:
-    #     print("killing process!!!!!!!!!!!!!!!!")
-    #     if psutil.pid_exists(pid) == False:
-    #         for child in pid.children(recursive=True):
-    #             child.kill()
-    #         pid.kill()
-    #     else: 
-    #         pass
-
-    ## ttydports duplicate port?
-
-    print("==========================")
-
-    # out = subprocess.check_output(['./ttyd.x86_64', '-p', '0', 'docker', 'run', '-it', 'localhost:5000/ubuntu:18.04'])
-    # print(out)
-    return render(request, 'container.html', {'open_source':open_source, 'port':port})
-
-
+@login_required
 def container(request, fullname):
     open_source = get_object_or_404(OpenSource, fullname=fullname)
     total_likes = open_source.total_likes()
-    comments = Comment.objects.filter(opensource = fullname)
-    ttydports = "netstat -taunp | grep ttyd | awk '{print $4}' | awk -F ':' '{print $2}'"
+    comments = Comment.objects.filter(opensource=fullname)
+    listports = "netstat -taunp | grep ttyd | awk '{print $4}' | awk -F ':' '{print $2}'"
     startshell = "./ttyd.x86_64 -p 0 docker run -it localhost:5000/" + open_source.projectname + ":"  + open_source.tag    
+    user = request.user
+    profile = get_object_or_404(Profile, user=user)
 
     if request.method == 'POST':
         comment = request.POST['comment']
         opensource = open_source
-        user = request.user
         Comment.objects.create(comment=comment, opensource=open_source, user=user)
         comments = Comment.objects.filter(opensource = fullname)
-
     else:
-        ### critical section ###
+        # if request's user project is same as entered project 
+        print("profile.opensource", profile.opensource)
+        print("open_source.fullname", open_source.fullname)
+        
+        if profile.opensource != open_source.fullname:
+            profile.opensource = open_source.fullname
+            profile.save()
 
-        # current opened port
-        proc = subprocess.Popen(ttydports, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
-        output = proc.communicate()[0]
-        old_used_port = list(dict.fromkeys(output.strip().splitlines()))
-        if ('' in old_used_port):
-            old_used_port.remove('')
-        # start ttyd process
-        process = subprocess.Popen(startshell, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
+            ##### get port CRITICAL SECTION #####
+            output = subprocess.Popen(listports, shell=True, stdout=subprocess.PIPE, encoding='utf-8').communicate()[0]
 
-        # newly added port
-        proc = subprocess.Popen(ttydports, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
+            old_used_port = list(dict.fromkeys(output.strip().splitlines()))
+            if ('' in old_used_port):
+                old_used_port.remove('')
 
-        output = proc.communicate()[0]
-        new_used_port = list(dict.fromkeys(output.strip().splitlines()))
-        if ('' in new_used_port):
-            new_used_port.remove('')
-        print("new used port : ", new_used_port)
-        # select port which is not in old_used_port 
+            # start ttyd process
+            process = subprocess.Popen(startshell, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
 
+            # newly added port
+            output = subprocess.Popen(listports, shell=True, stdout=subprocess.PIPE, encoding='utf-8').communicate()[0]
 
-        # allocate port to user, 
+            new_used_port = list(dict.fromkeys(output.strip().splitlines()))
+            if ('' in new_used_port):
+                new_used_port.remove('')
+            
+            print("new used port as list : ", new_used_port)
+            port = list(set(new_used_port) - set(old_used_port))[0]
+            print("port" , port)
+            #### get port end ####
 
-        ### End critical section ###
+            # release previous port - if profile.port == -1: pass, else: release profile.port
+            if profile.port == -1:
+                profile.port = port
+                profile.save()
+            else:                
+                os.system("fuser -k " + str(profile.port) + "/tcp")
+                profile.port = port
+                profile.save()
 
-    return render(request, 'container.html', {'open_source':open_source, 'comments':comments, 'total_likes':total_likes})
+            url = BASE_URL + ":" + port
+        else:
+            print("passing .................... ")
+            output = subprocess.Popen(listports, shell=True, stdout=subprocess.PIPE, encoding='utf-8').communicate()[0]
+
+            new_used_port = list(dict.fromkeys(output.strip().splitlines()))
+            if ('' in new_used_port):
+                new_used_port.remove('')
+            
+            print("new used port as list : ", new_used_port)
+
+            url = BASE_URL + ":" + str(profile.port)
+
+    return render(request, 'container.html', {'url':url, 'open_source':open_source, 'comments':comments, 'total_likes':total_likes})
 
 
 def userimg(request):
