@@ -20,13 +20,10 @@ TAG_PREFIX = 'localhost:5000/'
 # docker must be installed
 client = docker.from_env()
 
-ps_table = []
-
 def LikeView(request, fullname):
     print("into views")
     print(fullname)
     opensource = get_object_or_404(OpenSource, fullname=fullname)
-    
     
     re = opensource.likes.filter(username=request.user.username)
     
@@ -46,7 +43,9 @@ def list_duplicates(seq):
   return list( seen_twice )
 
 def index(request):
-    return render(request, 'index.html')
+    open_sources = OpenSource.objects.all()
+
+    return render(request, 'index.html', {'open_sources':open_sources})
 
 def listimg(request):
     # get all open source images
@@ -140,10 +139,25 @@ def DeleteView(request, fullname):
     return HttpResponseRedirect(reverse('user'))
 
 def login(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password']
 
+        user = auth.authenticate(
+            request, username=username, password=password
+        )
 
-    return render(request, 'login.html')
+        if user is not None:
+            auth.login(request, user)
+            return redirect('index')
+        else:
+            return render(request, "login.html", {
+                'error': 'Username or Password is incorrect.',
+            })
+    else:
+        return render(request, "login.html")
 
+        
 def register(request):
     ## TODO/Exception Handling:duplicate username 
     if request.method == 'POST':

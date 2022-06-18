@@ -29,7 +29,7 @@
             </div>
             <div class ="row">
                 <div class="col-sm-4 grid-margin"> 
-                    <h3>trending projects</h3>
+                    <h3>Most Popular Projects</h3>
                 </div>
             </div>
             <div class="row">
@@ -97,67 +97,70 @@
                       <table class="table">
                         <thead>
                           <tr>
-                            <th> Image name </th>
-                            <th> Tag </th>
-                            <th> Links </th>
-                            <th> Start Date </th>
-                            <th> Use online </th>
+                            <th>Image Name</th>
+                            <th>Tag</th>
+                            <th>Author</th>
+                            <th>Uploaded At (GMT)</th>
+                            <th>Star</th>
+                            <th>Try</th>
                           </tr>
                         </thead>
                         <tbody>
+                          {% for open_source in open_sources %}
                           <tr>
-                            <td> centos </td>
-                            <td> 7 </td>
-                            <td> link </td>
-                            <td> 04 Dec 2019 </td>
-                            <td>
-                              <div class="badge badge-outline-success">try this on browser</div>
-                            </td>
+                            <td>{{open_source.projectname}} <i class="mdi mdi-link"></i></td>
+                            <td>{{open_source.tag}}</td> 
+                            <td>{{open_source.author}}</td>
+                            <td>{{open_source.uploaded_at}}</td> 
+                            <td class="text-danger"><i class="mdi mdi-star"></i> 28.76% </td>
+                            <td><a href="{% url 'container' open_source.fullname %}"><label class="badge badge-success">Try</label></a></td>
                           </tr>
-                          <tr>
-                            <td> CentOS </td>
-                            <td> latest </td>
-                            <td> link </td>
-                            <td> 04 Dec 2019 </td>
-                            <td>
-                              <div class="badge badge-outline-success">try this on browser</div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td> ubuntu </td>
-                            <td> 16.04 </td>
-                            <td> link </td>
-                            <td> 04 Dec 2019 </td>
-                            <td>
-                              <div class="badge badge-outline-success">try this on browser</div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td> ubuntu </td>
-                            <td> 18.04 </td>
-                            <td> link </td>
-                            <td> 04 Dec 2019 </td>
-                            <td>
-                                <div class="badge badge-outline-success">try this on browser</div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td> busybox </td>
-                            <td> latest </td>
-                            <td> link </td>
-                            <td> 04 Dec 2019 </td>
-                            <td>
-                              <div class="badge badge-outline-success">try this on browser</div>
-                            </td>
-                          </tr>
+                          {% endfor %}
                         </tbody>
                       </table>
                     </div>
                   </div>
                 </div>
+                <br/>
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Recent Open sources</h4>
+                    <div class="table-responsive">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>Image Name</th>
+                            <th>Tag</th>
+                            <th>Author</th>
+                            <th>Uploaded At (GMT)</th>
+                            <th>Star</th>
+                            <th>Try</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for open_source in open_sources %}
+                          <tr>
+                            <td>{{open_source.projectname}} <i class="mdi mdi-link"></i></td>
+                            <td>{{open_source.tag}}</td> 
+                            <td>{{open_source.author}}</td>
+                            <td>{{open_source.uploaded_at}}</td> 
+                            <td class="text-danger"><i class="mdi mdi-star"></i> 28.76% </td>
+                            <td><a href="{% url 'container' open_source.fullname %}"><label class="badge badge-success">Try</label></a></td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
+
+
+
+
           <!-- content-wrapper ends -->
           <!-- partial:partials/_footer.html -->
           <footer class="footer">
