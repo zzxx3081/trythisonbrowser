@@ -50,6 +50,12 @@ def index(request):
 def listimg(request):
     # get all open source images
     open_sources = OpenSource.objects.all()
+    
+    if request.method == 'POST':
+        searchword = request.POST['searchword']
+        open_sources = OpenSource.objects.filter(projectname=searchword.lower())
+        ## TODO advanced search: captical words ... 
+
     ## TODO pagination 
 
     return render(request, 'list.html', {'open_sources':open_sources})
@@ -163,9 +169,14 @@ def register(request):
     if request.method == 'POST':
         form = UserForm(request.POST)
         if request.POST['password1'] == request.POST['password2']:
-            user = User.objects.create_user(username=request.POST['username'], password=request.POST['password1'])
-            auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')  
-            return redirect('/')
+            try:
+                user = User.objects.create_user(username=request.POST['username'], password=request.POST['password1'])
+                auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')  
+                return redirect('/')
+            except IntegrityError:
+                messages.warning(request, "Already registered")
+                return render(request, 'register.html', {'form': form})        
+            
         else: 
             messages.warning(request, "password doesn't match")
             return render(request, 'register.html', {'form': form})
