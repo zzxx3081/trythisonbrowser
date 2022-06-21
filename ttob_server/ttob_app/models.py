@@ -3,6 +3,11 @@ from django.conf import settings
 from django.db.models import UniqueConstraint
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from taggit.managers import TaggableManager
+from taggit.models import TaggedItemBase
+
+class TaggedOpenSource(TaggedItemBase):
+    content_object = models.ForeignKey('OpenSource', on_delete=models.CASCADE)
 
 class OpenSource(models.Model):
     fullname = models.CharField(max_length=100, primary_key=True)
@@ -13,6 +18,7 @@ class OpenSource(models.Model):
     description = models.TextField(blank=False, null=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="opensource_likes", blank=True)
+    tags = TaggableManager(through=TaggedOpenSource, blank=True)
 
     def total_likes(self):
         return self.likes.count()

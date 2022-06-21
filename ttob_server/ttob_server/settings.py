@@ -25,6 +25,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'ttob_app',
+    'taggit',
+    
     #allauth
     'allauth',
     'allauth.account',
@@ -123,6 +125,9 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
+
+TAGGIT_CASE_INSENSITIVE = True
+TAGGIT_LIMIT = 10
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/

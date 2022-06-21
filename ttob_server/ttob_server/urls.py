@@ -19,6 +19,8 @@ urlpatterns = [
     path('logout/', logout, name="logout"),
     path('delete/<str:username>', delete, name="delete"),
     path('like/<str:fullname>', LikeView, name="like"),
+    path('tag/', TagCloudTV.as_view(), name='tag_cloud'),
+    path('tag/<str:tag>/', TaggedObjectLV.as_view(), name='tagged_object_list'),
     path('accounts/', include('allauth.urls')),
 ]
 

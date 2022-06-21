@@ -22,9 +22,9 @@
                         <i class="mdi mdi-heart-outline text-danger"></i>{{ total_likes }} Likes
                       </button>
                     </form>
-
                     <br/>
                     <blockquote class="blockquote blockquote-primary"><p>{{open_source.description}}</p></blockquote>                    
+                    {% for tag in open_source.tags.all %}#{{tag}} {% endfor %}
                   </div>
                 </div>
               </div>

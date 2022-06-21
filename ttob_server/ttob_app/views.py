@@ -4,6 +4,7 @@ from django.contrib import auth, messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.views.generic import ListView, DetailView, TemplateView
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from .models import OpenSource, Dockerfile, InstalltionScript, Comment, Profile
@@ -12,6 +13,7 @@ import docker, sys, os, io, subprocess, time, threading, psutil
 from django.conf import settings
 from pathlib import Path
 
+
 # registry url
 BASE_URL = 'http://127.0.0.1'
 TAG_PREFIX = 'localhost:5000/'
@@ -19,6 +21,22 @@ TAG_PREFIX = 'localhost:5000/'
 # initialize docker SDK
 # docker must be installed
 client = docker.from_env()
+
+class TagCloudTV(TemplateView):
+    template_name = 'taggit/taggit_cloud.html'
+
+
+class TaggedObjectLV(ListView):
+    template_name = 'taggit/taggit_post_list.html'
+    model = OpenSource
+
+    def get_queryset(self):
+        return OpenSource.objects.filter(tags__name=self.kwargs.get('tag'))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tagname'] = self.kwargs['tag']
+        return context
 
 def LikeView(request, fullname):
     print("into views")
@@ -217,10 +235,15 @@ def dockerfile(request):
         tag = request.POST['tag']
         contact = request.POST['contact']
         description = request.POST['description']
+        hashtags = request.POST.get('hashtag', '').split(',')
+
         registry_tag = TAG_PREFIX + projectname + ":" + tag
         fullname = projectname + ":" + tag
         try:
-            OpenSource.objects.create(fullname=fullname, author=author, projectname=projectname, tag=tag, contact=contact, description=description)
+            opensource = OpenSource.objects.create(fullname=fullname, author=author, projectname=projectname, tag=tag, contact=contact, description=description)
+            for hashtag in hashtags:
+                hashtag = hashtag.strip()
+                opensource.tags.add(hashtag)
             obj = Dockerfile.objects.create(file=request.FILES['dockerfile'])
             try:
                 image = client.images.build(fileobj=obj.file, tag=registry_tag)
@@ -248,13 +271,18 @@ def script(request):
         tag = request.POST['tag']
         contact = request.POST['contact']
         description = request.POST['description']
+        hashtags = request.POST.get('hashtag', '').split(',')
+
         registry_tag = TAG_PREFIX + projectname + ":" + tag
         fullname = projectname + ":" + tag
         baseos = request.POST['baseos']
         installationscript = request.POST['installationscript']
         
         try:
-            OpenSource.objects.create(fullname=fullname, author=author, projectname=projectname, tag=tag, contact=contact, description=description)
+            opensource = OpenSource.objects.create(fullname=fullname, author=author, projectname=projectname, tag=tag, contact=contact, description=description)
+            for hashtag in hashtags:
+                hashtag = hashtag.strip()
+                opensource.tags.add(hashtag)
             try:
                 InstalltionScript.objects.create(baseos=baseos, installationScript=installationscript)
                 f = open("Dockerfile", 'w')
