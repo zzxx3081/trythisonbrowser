@@ -52,26 +52,27 @@ def LikeView(request, fullname):
 
     return HttpResponseRedirect(reverse('container', args=[fullname]))
 
-def list_duplicates(seq):
-  seen = set()
-  seen_add = seen.add
-  # adds all elements it doesn't know yet to seen and all other to seen_twice
-  seen_twice = set( x for x in seq if x in seen or seen_add(x) )
-  # turn the set into a list (as requested)
-  return list( seen_twice )
-
 def index(request):
-    open_sources = OpenSource.objects.all()
+    # show 5 recent opensources
+    recent = OpenSource.objects.all().order_by('-uploaded_at')[:5]
 
-    return render(request, 'index.html', {'open_sources':open_sources})
+    ## 
+    unsorted_results = OpenSource.objects.all()
+    popular = sorted(unsorted_results, key= lambda t: t.total_likes(), reverse=True)[0:3]
+
+    for os in popular:
+        print("prject : ", os.projectname)
+        print("likes : ", os.total_likes())
+
+    return render(request, 'index.html', {'recent':recent, 'popular':popular})
 
 def listimg(request):
     # get all open source images
-    open_sources = OpenSource.objects.all()
+    open_sources = OpenSource.objects.all().order_by('-uploaded_at')
     
     if request.method == 'POST':
         searchword = request.POST['searchword']
-        open_sources = OpenSource.objects.filter(projectname=searchword.lower())
+        open_sources = OpenSource.objects.filter(projectname=searchword.lower()).order_by('-uploaded_at')
         ## TODO advanced search: captical words ... 
 
     ## TODO pagination 
@@ -94,6 +95,7 @@ def container(request, fullname):
         opensource = open_source
         Comment.objects.create(comment=comment, opensource=open_source, user=user)
         comments = Comment.objects.filter(opensource = fullname)
+        url = BASE_URL + ":" + str(profile.port)
     else:
         # if request's user project is same as entered project 
         print("profile.opensource", profile.opensource)
