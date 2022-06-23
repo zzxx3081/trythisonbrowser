@@ -1,0 +1,2 @@
+FROM archlinux:latest
+

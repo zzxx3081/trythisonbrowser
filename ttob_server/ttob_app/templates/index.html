@@ -55,6 +55,7 @@
             </div>
             <div class="row ">
               <div class="col-12 grid-margin">
+                
                 <div class="card">
                   <div class="card-body">
                     <h4 class="card-title">Open sources you may like</h4>
@@ -71,14 +72,18 @@
                           </tr>
                         </thead>
                         <tbody>
-                          {% for open_source in recent %}
+                          {% for open_source in user_liked_tagged_open_source %}
                           <tr>
-                            <td>{{open_source.projectname}} <i class="mdi mdi-link"></i></td>
+                            <td>{{open_source.projectname}}</td>
                             <td>{{open_source.tag}}</td> 
                             <td>{{open_source.author}}</td>
                             <td>{{open_source.uploaded_at}}</td> 
                             <td class="text-danger"><i class="mdi mdi-heart"></i> {{open_source.total_likes}} </td>
                             <td><a href="{% url 'container' open_source.fullname %}"><label class="badge badge-success">Try</label></a></td>
+                          </tr>
+                          {% empty %}
+                          <tr>
+                            <td style="color:red;">please press like button for recommendations</td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -86,6 +91,7 @@
                     </div>
                   </div>
                 </div>
+
                 <br/>
                 <div class="card">
                   <div class="card-body">
@@ -105,7 +111,7 @@
                         <tbody>
                           {% for open_source in recent %}
                           <tr>
-                            <td>{{open_source.projectname}} <i class="mdi mdi-link"></i></td>
+                            <td>{{open_source.projectname}}</td>
                             <td>{{open_source.tag}}</td> 
                             <td>{{open_source.author}}</td>
                             <td>{{open_source.uploaded_at}}</td> 

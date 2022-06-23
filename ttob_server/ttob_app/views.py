@@ -56,15 +56,33 @@ def index(request):
     # show 5 recent opensources
     recent = OpenSource.objects.all().order_by('-uploaded_at')[:5]
 
-    ## 
     unsorted_results = OpenSource.objects.all()
     popular = sorted(unsorted_results, key= lambda t: t.total_likes(), reverse=True)[0:3]
 
-    for os in popular:
-        print("prject : ", os.projectname)
-        print("likes : ", os.total_likes())
+    u = User.objects.get(username=request.user.username)
+    open_sources = u.opensource_likes.all()
 
-    return render(request, 'index.html', {'recent':recent, 'popular':popular})
+    user_liked_tag = []
+
+    print("user liked tags")
+    for open_source in open_sources:
+        os_tags = open_source.tags.all()
+        for tags in os_tags:
+            user_liked_tag.append(tags.name)
+
+    user_liked_tags = list(set(user_liked_tag))
+    print(user_liked_tags)
+    user_liked_tagged_open_source = OpenSource.objects.filter(tags__name__in=user_liked_tag).distinct()[0:5]
+    
+    if user_liked_tagged_open_source.exists():
+        recommend = True
+    else:
+        recommend = False
+
+    print("tagged opensource")
+    print(user_liked_tagged_open_source)
+
+    return render(request, 'index.html', {'recent':recent, 'popular':popular, 'user_liked_tagged_open_source':user_liked_tagged_open_source})
 
 def listimg(request):
     # get all open source images
@@ -156,6 +174,7 @@ def container(request, fullname):
 def user(request):
     u = User.objects.get(username=request.user.username)
     open_sources = u.opensource_likes.all()
+
     return render(request, 'user.html', {'open_sources':open_sources})
 
 
