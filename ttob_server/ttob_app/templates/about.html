@@ -1,0 +1,115 @@
+        {% extends 'base.html' %}
+       {% load static %}
+        {% block content %}
+
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title">Project trythisonbrowser</h3>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">                    
+                    <strong>trythisonbrowser</strong> is an open source demo platform made by <a href="https://github.com/kangtegong">Kang Minchul</a>, 
+                    linux system programmer of South Korea.<br/> 
+                    You can easily upload and try out various open sources like gcc, clang, linux distros, uftrace, etc and 
+                    reach out to maintainers of these projects through this platform.
+                    
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="page-header">
+              <h3 class="page-title">How to use</h3>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    You can sign in with google or github. Or you can sign up manually with username, password, and email.<br/>
+                    If you want to delete your accout, go to user settings, and press <mark class="bg-danger text-white">Delete Your ID</mark> button.<br/><br/>
+
+                    Once you sign in, you will see <strong>most popular project (most liked project)</strong>, and <strong>open sources you may like</strong>, and 
+                    <strong>Recently added open sources</strong>.<br/><br/>
+
+                    We will recommend open sources based on <strong>hashtags</strong>. <br/>
+                    If you haven't pressed any likes, we can't recommend any projects for you, so feel free to like as many projects as possible :)
+                    <br/><br/>
+
+                    If you go <strong>My Containers</strong> menu, you can see open sources you pressed like button.<br/><br/>
+
+                    Note that we only allow <mark class="bg-warning text-white">one open source per user</mark>. You <strong>cannot</strong> try out more than two open source at the same time.
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="page-header">
+              <h3 class="page-title">Upload your opensource</h3>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+
+                    You can either upload your opensource with your Dockerfile, or installation script.<br/>
+                    Note that you should sign up before upload your project.<br/><br/>
+                    If you click <mark class="bg-success text-white"> + Create New Project</mark> above, you will see <strong>Create with installation script</strong>, 
+                    and <strong>Create with Dockerfile</strong>.<br/><br/>
+
+                    <h3>Create with installation script</h3>
+
+                    This is a way to upload your opensource with installation script.<br/>
+                    First type project author, project name, tag (of the image), contact point, project description and hastag like image below.<br/>
+                    Then choose your operating system you want to install and write out installation script.<br/>
+                    Note that the script should be detailed and precise(otherwise) because otherwise it would not be installed.<br/>
+                    Once script ran successfully, trythisonbrowser will create an docker image based on your script.<br/><br/>
+                    <img src="{% static 'assets/images/about1.png'%}" width="100%" alt="upload with installation script example" />
+                    <br/><br/>
+
+                    <h3>Create with Dockerfile</h3>
+
+                    If your project has Dockerfile, just upload your Dockerfile like below.<br/>
+                    Then trythisonbrowser will create an docker image based on your Dockerfile.<br/><br/>
+                    <img src="{% static 'assets/images/about2.png'%}" width="100%" alt="upload with Dockerfile example" />
+
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="page-header">
+              <h3 class="page-title">Bug reports or contribute</h3>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    If you have any issues or great ideas, fill free to contact me via <a href="mailto:tegongkang@gmail.com" class="btn btn-outline-secondary btn-sm">email</a> or <a href="https://github.com/kangtegong/trythisonbrowser/issues" class="btn btn-outline-secondary btn-sm">github issues</a>.<br/><br/>
+                    <ul>
+                      <li>Email: tegongkang@gmail.com</li>
+                      <li>Github: https://github.com/kangtegong/trythisonbrowser/issues</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            Special Thanks for <strong>Kim Jaewook</strong>, <strong>Kim Seongbin</strong>, <strong>Yeom Kyuhwan</strong> for helping out and contributing ideas.
+
+          </div>
+          <!-- content-wrapper ends -->
+          <!-- partial:../../partials/_footer.html -->
+          <footer class="footer">
+            <div class="d-sm-flex justify-content-center justify-content-sm-between">
+              <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © bootstrapdash.com 2021</span>
+              <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center"> Free <a href="https://www.bootstrapdash.com/bootstrap-admin-template/" target="_blank">Bootstrap admin template</a> from Bootstrapdash.com</span>
+            </div>
+          </footer>
+          <!-- partial -->
+        </div>
+       {% endblock %}

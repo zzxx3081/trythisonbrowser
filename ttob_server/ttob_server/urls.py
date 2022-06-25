@@ -8,6 +8,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name="index"),
     path('list/', listimg, name="listimg"),
+    path('about/', about, name="about"),
     
     path('user/', user, name="user"),
     path('deleteopensource/<str:fullname>', DeleteView, name="deleteopensource"),

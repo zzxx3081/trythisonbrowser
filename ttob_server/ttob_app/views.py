@@ -52,6 +52,9 @@ def LikeView(request, fullname):
 
     return HttpResponseRedirect(reverse('container', args=[fullname]))
 
+def about(request):
+    return render(request, 'about.html')
+
 def index(request):
     # show 5 recent opensources
     recent = OpenSource.objects.all().order_by('-uploaded_at')[:5]
