@@ -62,30 +62,33 @@ def index(request):
     unsorted_results = OpenSource.objects.all()
     popular = sorted(unsorted_results, key= lambda t: t.total_likes(), reverse=True)[0:3]
 
-    u = User.objects.get(username=request.user.username)
-    open_sources = u.opensource_likes.all()
+    if request.user.is_authenticated:
+        u = User.objects.get(username=request.user.username)
+        open_sources = u.opensource_likes.all()
 
-    user_liked_tag = []
+        user_liked_tag = []
 
-    print("user liked tags")
-    for open_source in open_sources:
-        os_tags = open_source.tags.all()
-        for tags in os_tags:
-            user_liked_tag.append(tags.name)
+        print("user liked tags")
+        for open_source in open_sources:
+            os_tags = open_source.tags.all()
+            for tags in os_tags:
+                user_liked_tag.append(tags.name)
 
-    user_liked_tags = list(set(user_liked_tag))
-    print(user_liked_tags)
-    user_liked_tagged_open_source = OpenSource.objects.filter(tags__name__in=user_liked_tag).distinct()[0:5]
-    
-    if user_liked_tagged_open_source.exists():
-        recommend = True
+        user_liked_tags = list(set(user_liked_tag))
+        print(user_liked_tags)
+        user_liked_tagged_open_source = OpenSource.objects.filter(tags__name__in=user_liked_tag).distinct()[0:5]
+        
+        if user_liked_tagged_open_source.exists():
+            recommend = True
+        else:
+            recommend = False
+
+        print("tagged opensource")
+        print(user_liked_tagged_open_source)
+
+        return render(request, 'index.html', {'recent':recent, 'popular':popular, 'user_liked_tagged_open_source':user_liked_tagged_open_source})
     else:
-        recommend = False
-
-    print("tagged opensource")
-    print(user_liked_tagged_open_source)
-
-    return render(request, 'index.html', {'recent':recent, 'popular':popular, 'user_liked_tagged_open_source':user_liked_tagged_open_source})
+        return render(request, 'index.html', {'recent':recent, 'popular':popular})
 
 def listimg(request):
     # get all open source images
@@ -186,6 +189,7 @@ def DeleteView(request, fullname):
     opensource.likes.remove(request.user)
     return HttpResponseRedirect(reverse('user'))
 
+@login_required(login_url="/login/")
 def login(request):
     if request.method == "POST":
         username = request.POST['username']
