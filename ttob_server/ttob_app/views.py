@@ -176,7 +176,7 @@ def container(request, fullname):
 
     return render(request, 'container.html', {'url':url, 'open_source':open_source, 'comments':comments, 'total_likes':total_likes})
 
-
+@login_required(login_url="/login/")
 def user(request):
     u = User.objects.get(username=request.user.username)
     open_sources = u.opensource_likes.all()
@@ -189,7 +189,6 @@ def DeleteView(request, fullname):
     opensource.likes.remove(request.user)
     return HttpResponseRedirect(reverse('user'))
 
-@login_required(login_url="/login/")
 def login(request):
     if request.method == "POST":
         username = request.POST['username']
