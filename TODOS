@@ -11,3 +11,5 @@ URL 업로드?
 input 과정에서 cleaned data? 
 POST.get('tags', '') ?
 
+어디에서 python manage.py runserver를 하느냐에 따라 ttyd가 실행 안될 수도 있음
+./ttyd 라고 되어 있어서..

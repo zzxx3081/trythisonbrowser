@@ -21,7 +21,7 @@
                             <th>Tag</th>
                             <th>Author</th>
                             <th>Uploaded At (GMT)</th>
-                            <th>Star</th>
+                            <th>Likes</th>
                             <th>Try</th>
                             <th>Delete</th>
                           </tr>
@@ -33,7 +33,7 @@
                             <td>{{open_source.tag}}</td> 
                             <td>{{open_source.author}}</td>
                             <td>{{open_source.uploaded_at}}</td> 
-                            <td class="text-danger"><i class="mdi mdi-star"></i> 28.76% </td>
+                            <td class="text-danger"><i class="mdi mdi-heart"></i> {{open_source.total_likes }} </td>
                             <td><a href="{% url 'container' open_source.fullname %}"><label class="badge badge-success">Try</label></a></td>
                             <td>
                               <form action="{% url 'deleteopensource' open_source.fullname %}" method="POST">{% csrf_token %}
