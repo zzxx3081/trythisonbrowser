@@ -18,10 +18,14 @@ class OpenSource(models.Model):
     description = models.TextField(blank=False, null=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="opensource_likes", blank=True)
+    dislikes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="opensource_dislikes", blank=True)
     tags = TaggableManager(through=TaggedOpenSource, blank=True)
 
     def total_likes(self):
         return self.likes.count()
+
+    def total_dislikes(self):
+        return self.dislikes.count()
 
     class Meta:
         constraints = [

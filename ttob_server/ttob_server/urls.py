@@ -8,6 +8,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name="index"),
     path('list/', listimg, name="listimg"),
+
     path('about/', about, name="about"),
     
     path('user/', user, name="user"),
@@ -22,6 +23,8 @@ urlpatterns = [
 
     path('container/<str:fullname>/', container, name="container"),
     path('like/<str:fullname>', LikeView, name="like"),
+    path('dislike/<str:fullname>', DisLikeView, name="dislike"),
+    
     
     path('install/dockerfile', dockerfile, name="dockerfile"),
     path('install/script', script, name="script"),

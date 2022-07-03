@@ -23,6 +23,14 @@
                       </button>
                     </form>
                     <br/>
+
+                    <form action="{% url 'dislike' open_source.fullname %}" method="POST">{% csrf_token %}
+                      <button type="submit" class="btn btn-outline-secondary btn-sm" name="opensource_id", value="{{ open_source.id }}">
+                        <i class="mdi mdi-comment-remove-outline text-danger"></i> OpenSource Not Working : {{ total_dislikes }}
+                      </button>
+                    </form>
+                    <br/>
+
                     <blockquote class="blockquote blockquote-primary"><p>{{open_source.description}}</p></blockquote>                    
                     {% for tag in open_source.tags.all %}<strong style="color:#fc424a;">#</strong>{{tag}} {% endfor %}
                   </div>

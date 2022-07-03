@@ -39,8 +39,6 @@ class TaggedObjectLV(ListView):
         return context
 
 def LikeView(request, fullname):
-    print("into views")
-    print(fullname)
     opensource = get_object_or_404(OpenSource, fullname=fullname)
     
     re = opensource.likes.filter(username=request.user.username)
@@ -49,6 +47,24 @@ def LikeView(request, fullname):
         opensource.likes.remove(request.user)
     else:
         opensource.likes.add(request.user)
+
+    return HttpResponseRedirect(reverse('container', args=[fullname]))
+
+
+def DisLikeView(request, fullname):
+    opensource = get_object_or_404(OpenSource, fullname=fullname)
+    
+    re = opensource.dislikes.filter(username=request.user.username)
+    if re.exists():
+        opensource.dislikes.remove(request.user)
+    else:
+        opensource.dislikes.add(request.user)
+        total_dislikes = opensource.total_dislikes()
+        if total_dislikes >= 3:
+            opensource.delete()
+            return redirect('index')
+        else:
+            pass
 
     return HttpResponseRedirect(reverse('container', args=[fullname]))
 
@@ -103,11 +119,11 @@ def listimg(request):
 
     return render(request, 'list.html', {'open_sources':open_sources})
 
-
 @login_required
 def container(request, fullname):
     open_source = get_object_or_404(OpenSource, fullname=fullname)
     total_likes = open_source.total_likes()
+    total_dislikes = open_source.total_dislikes()
     comments = Comment.objects.filter(opensource=fullname)
     listports = "netstat -taunp | grep ttyd | awk '{print $4}' | awk -F ':' '{print $2}'"
     startshell = "./ttyd.x86_64 -p 0 docker run -it localhost:5000/" + open_source.projectname + ":"  + open_source.tag    
@@ -174,7 +190,7 @@ def container(request, fullname):
 
             url = BASE_URL + ":" + str(profile.port)
 
-    return render(request, 'container.html', {'url':url, 'open_source':open_source, 'comments':comments, 'total_likes':total_likes})
+    return render(request, 'container.html', {'url':url, 'open_source':open_source, 'comments':comments, 'total_likes':total_likes, 'total_dislikes':total_dislikes})
 
 @login_required(login_url="/login/")
 def user(request):
@@ -278,6 +294,7 @@ def dockerfile(request):
                 for line in client.api.push(repository=registry_tag, stream=True, decode=True):
                     print(line)
                     print("INFO: image upload complete.")
+                return redirect('list')
             except Exception:
                 messages.warning(request, 'Dockerfile Build Error')
                 return render(request, 'install_dockerfile.html')
@@ -328,7 +345,7 @@ def script(request):
                 for line in client.api.push(repository=registry_tag, stream=True, decode=True):
                     print(line)
                     print("INFO: image upload complete.")
-                return render(request, 'install_script.html')
+                return redirect('list')
             except Exception:
                 messages.warning(request, 'Dockerfile Build Error')
             finally:
