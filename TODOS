@@ -13,3 +13,6 @@ POST.get('tags', '') ?
 
 어디에서 python manage.py runserver를 하느냐에 따라 ttyd가 실행 안될 수도 있음
 ./ttyd 라고 되어 있어서..
+
+로그인 안하고 바로 try 눌렀을 때 allauth가 제공하는 로그인페이지 말고
+내가 만든 로그인페이지로 이동하게 하기
