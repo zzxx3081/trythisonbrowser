@@ -68,7 +68,9 @@
                             <th>Author</th>
                             <th>Uploaded At (GMT)</th>
                             <th>Likes</th>
+                            {% if user.is_authenticated %}
                             <th>Try</th>
+                            {% endif %}
                           </tr>
                         </thead>
                         <tbody>
@@ -105,7 +107,9 @@
                             <th>Author</th>
                             <th>Uploaded At (GMT)</th>
                             <th>Likes</th>
+                            {% if user.is_authenticated %}
                             <th>Try</th>
+                            {% endif %}
                           </tr>
                         </thead>
                         <tbody>
@@ -116,7 +120,9 @@
                             <td>{{open_source.author}}</td>
                             <td>{{open_source.uploaded_at}}</td> 
                             <td class="text-danger"><i class="mdi mdi-heart"></i> {{open_source.total_likes}} </td>
+                            {% if user.is_authenticated %}
                             <td><a href="{% url 'container' open_source.fullname %}"><label class="badge badge-success">Try</label></a></td>
+                            {% endif %}
                           </tr>
                           {% endfor %}
                         </tbody>

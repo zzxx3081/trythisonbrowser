@@ -12,7 +12,9 @@ from .forms import UserForm
 import docker, sys, os, io, subprocess, time, threading, psutil
 from django.conf import settings
 from pathlib import Path
+from threading import Lock
 
+lock = Lock()
 
 # registry url
 BASE_URL = 'http://127.0.0.1'
@@ -126,7 +128,7 @@ def container(request, fullname):
     total_dislikes = open_source.total_dislikes()
     comments = Comment.objects.filter(opensource=fullname)
     listports = "netstat -taunp | grep ttyd | awk '{print $4}' | awk -F ':' '{print $2}'"
-    startshell = "./ttyd.x86_64 -p 0 docker run -it localhost:5000/" + open_source.projectname + ":"  + open_source.tag    
+    startshell = "./ttyd.x86_64 -p 0 docker run -it " + open_source.projectname + ":"  + open_source.tag    
     user = request.user
     profile = get_object_or_404(Profile, user=user)
 
@@ -145,39 +147,43 @@ def container(request, fullname):
             profile.opensource = open_source.fullname
             profile.save()
 
-            ##### get port CRITICAL SECTION #####
-            output = subprocess.Popen(listports, shell=True, stdout=subprocess.PIPE, encoding='utf-8').communicate()[0]
+            if (lock.acquire(blocking=True) == True): 
+                #################### get port CRITICAL SECTION ####################
+                output = subprocess.Popen(listports, shell=True, stdout=subprocess.PIPE, encoding='utf-8').communicate()[0]
 
-            old_used_port = list(dict.fromkeys(output.strip().splitlines()))
-            if ('' in old_used_port):
-                old_used_port.remove('')
+                old_used_port = list(dict.fromkeys(output.strip().splitlines()))
+                if ('' in old_used_port):
+                    old_used_port.remove('')
 
-            # start ttyd process
-            process = subprocess.Popen(startshell, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
+                # start ttyd process
+                process = subprocess.Popen(startshell, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
 
-            # newly added port
-            output = subprocess.Popen(listports, shell=True, stdout=subprocess.PIPE, encoding='utf-8').communicate()[0]
+                # newly added port
+                output = subprocess.Popen(listports, shell=True, stdout=subprocess.PIPE, encoding='utf-8').communicate()[0]
 
-            new_used_port = list(dict.fromkeys(output.strip().splitlines()))
-            if ('' in new_used_port):
-                new_used_port.remove('')
+                new_used_port = list(dict.fromkeys(output.strip().splitlines()))
+                if ('' in new_used_port):
+                    new_used_port.remove('')
+                
+                print("new used port as list : ", new_used_port)
+                port = list(set(new_used_port) - set(old_used_port))[0]
+                print("port" , port)
+
+                if profile.port == -1:
+                    profile.port = port
+                    profile.save()
+                else:                
+                    ##### get port CRITICAL SECTION #####
+                    os.system("fuser -k " + str(profile.port) + "/tcp")
+                    ##### get port END CRITICAL SECTION #####
+                    profile.port = port
+                    profile.save()
+
+                url = BASE_URL + ":" + port
+                #################### END ####################            
             
-            print("new used port as list : ", new_used_port)
-            port = list(set(new_used_port) - set(old_used_port))[0]
-            print("port" , port)
-            ##### get port END CRITICAL SECTION #####
 
-            if profile.port == -1:
-                profile.port = port
-                profile.save()
-            else:                
-                ##### get port CRITICAL SECTION #####
-                os.system("fuser -k " + str(profile.port) + "/tcp")
-                ##### get port END CRITICAL SECTION #####
-                profile.port = port
-                profile.save()
-
-            url = BASE_URL + ":" + port
+            lock.release()
         else:
             print("passing .................... ")
             output = subprocess.Popen(listports, shell=True, stdout=subprocess.PIPE, encoding='utf-8').communicate()[0]
@@ -306,6 +312,41 @@ def dockerfile(request):
     else:
         return render(request, 'install_dockerfile.html')
 
+
+@login_required(login_url="/login/")
+def dockerfile_v2(request):
+    ## POST: build from dockerfile
+    if request.method == 'POST':
+        author = request.POST['author']
+        projectname = request.POST['projectname']
+        tag = request.POST['tag']
+        contact = request.POST['contact']
+        description = request.POST['description']
+        hashtags = request.POST.get('hashtag', '').split(',')        
+        fullname = projectname + ":" + tag
+
+        try:
+            opensource = OpenSource.objects.create(fullname=fullname, author=author, projectname=projectname, tag=tag, contact=contact, description=description)
+            for hashtag in hashtags:
+                hashtag = hashtag.strip()
+                opensource.tags.add(hashtag)
+            obj = Dockerfile.objects.create(file=request.FILES['dockerfile'])
+            image = client.images.build(fileobj=obj.file, tag=fullname)
+            return redirect('listimg')
+        except IntegrityError:
+            messages.warning(request, 'Same Opensource has been already registered')
+            opensource.delete()
+            obj.delete()
+        except Exception:
+            messages.warning(request, 'Build Error')
+            opensource.delete()
+            obj.delete()
+        finally:
+            pass # TODO Remove tmp Dockerfile
+        return render(request, 'install_dockerfile.html')
+    else:
+        return render(request, 'install_dockerfile.html')
+
 @login_required(login_url="/login/")
 def script(request):
 
@@ -348,6 +389,7 @@ def script(request):
                 return redirect('list')
             except Exception:
                 messages.warning(request, 'Dockerfile Build Error')
+
             finally:
                 file_path = os.getcwd() + '/Dockerfile'
                 print("Dockerfile path : ", file_path)
@@ -360,3 +402,52 @@ def script(request):
         return render(request, 'install_script.html')
 
 
+@login_required(login_url="/login/")
+def script_v2(request):
+
+    if request.method == 'POST':
+        author = request.POST['author']
+        projectname = request.POST['projectname']
+        tag = request.POST['tag']
+        contact = request.POST['contact']
+        description = request.POST['description']
+        hashtags = request.POST.get('hashtag', '').split(',')
+
+        fullname = projectname + ":" + tag
+        baseos = request.POST['baseos']
+        installationscript = request.POST['installationscript']
+        
+        try:
+            opensource = OpenSource.objects.create(fullname=fullname, author=author, projectname=projectname, tag=tag, contact=contact, description=description)
+            for hashtag in hashtags:
+                hashtag = hashtag.strip()
+                opensource.tags.add(hashtag)
+            try:
+                InstalltionScript.objects.create(baseos=baseos, installationScript=installationscript)
+                f = open("Dockerfile", 'w')
+                data = "FROM " + baseos + '\n'
+                f.write(data)
+                lines = installationscript.splitlines()
+                for i in lines:
+                    if i != "":
+                        data = "RUN " + i + '\n'
+                        f.write(data)
+                f.close()
+                image = client.images.build(path=os.getcwd(), tag=fullname)
+                file_path = os.getcwd() + '/Dockerfile'
+                print("Dockerfile path : ", file_path)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                return redirect('listimg')
+
+            except Exception:
+                messages.warning(request, 'Dockerfile Build Error')
+                opensource.delete()
+                InstalltionScript.delete()
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+        except IntegrityError:
+            messages.warning(request, 'Same Opensource has been already registered')
+        return render(request, 'install_script.html')
+    else:
+        return render(request, 'install_script.html')

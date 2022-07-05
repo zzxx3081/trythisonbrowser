@@ -26,8 +26,8 @@ urlpatterns = [
     path('dislike/<str:fullname>', DisLikeView, name="dislike"),
     
     
-    path('install/dockerfile', dockerfile, name="dockerfile"),
-    path('install/script', script, name="script"),
+    path('install/dockerfile', dockerfile_v2, name="dockerfile"),
+    path('install/script', script_v2, name="script"),
     
     path('tag/', TagCloudTV.as_view(), name='tag_cloud'),
     path('tag/<str:tag>/', TaggedObjectLV.as_view(), name='tagged_object_list'),

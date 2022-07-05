@@ -1,18 +1,15 @@
-이미지/디자인 변경
-영상
+로딩 이미지
+URL 업로드
 
-코드 부분 prettify?
 배포
+pagination 
 
-URL 업로드?
-3명에게 승인받도록
 웹 프로젝트? 또 다른 포트
+깃허브 뱃지
 
 input 과정에서 cleaned data? 
 POST.get('tags', '') ?
 
-어디에서 python manage.py runserver를 하느냐에 따라 ttyd가 실행 안될 수도 있음
-./ttyd 라고 되어 있어서..
+어디에서 python manage.py runserver를 하느냐에 따라 ttyd가 실행 안될 수도 있음 ./ttyd 라고 되어 있어서.. >> ttyd를 PATH에 등록?
 
-로그인 안하고 바로 try 눌렀을 때 allauth가 제공하는 로그인페이지 말고
-내가 만든 로그인페이지로 이동하게 하기
+꼭 레지스트리도 이용해야하나?
