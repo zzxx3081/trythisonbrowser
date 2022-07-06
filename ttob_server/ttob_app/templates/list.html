@@ -50,6 +50,21 @@
                 </div>
               </div>
             </div>
+              <div class="btn-group" role="group" aria-label="Basic example">
+                {% if open_sources.has_previous %}
+                <a href="?page=1" class="btn btn-outline-secondary">Front</a>
+                <a href="?page={{open_sources.previous_page_number}}" class="btn btn-outline-secondary"> < </a>
+                {% endif %}
+
+                <a href="#" class="btn btn-primary">{{open_sources.number}}</a>
+                <a href="#" class="btn btn-primary"> / </a>
+                <a href="#" class="btn btn-primary">{{open_sources.paginator.num_pages}}</a>                
+
+                {% if open_sources.has_next %}
+                <a href="?page={{open_sources.next_page_number}}" class="btn btn-outline-secondary"> > </a>
+                <a href="?page={{open_sources.paginator.num_pages}}" class="btn btn-outline-secondary">Back</a>
+                {% endif %}
+              </div>
           </div>
           <!-- content-wrapper ends -->
           <!-- partial:../../partials/_footer.html -->

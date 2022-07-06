@@ -4,6 +4,7 @@ from django.contrib import auth, messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.views.generic import ListView, DetailView, TemplateView
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -111,7 +112,10 @@ def index(request):
 def listimg(request):
     # get all open source images
     open_sources = OpenSource.objects.all().order_by('-uploaded_at')
-    
+    page = request.GET.get('page')
+    paginator = Paginator(open_sources, 2)
+    open_sources = paginator.get_page(page)
+
     if request.method == 'POST':
         searchword = request.POST['searchword']
         open_sources = OpenSource.objects.filter(projectname=searchword.lower()).order_by('-uploaded_at')
